@@ -5,7 +5,6 @@ on:
     inputs:
       minecraft_versions:
         description: minecraft versions to publish (csv or spaces). leave blank to publish every version.
-        default: "26.3"
         required: false
         type: string
       dry_run:
@@ -24,6 +23,11 @@ on:
         description: Publish to GitHub Releases
         default: true
         type: boolean
+      release_type:
+        description: Release channel
+        default: STABLE
+        type: choice
+        options: [STABLE, BETA, ALPHA]
 
 permissions:
   contents: write
@@ -38,15 +42,16 @@ jobs:
     environment: release
     env:
       PUBLISH_VERSIONS: ${{ inputs.minecraft_versions }}
+      DRY_RUN: ${{ inputs.dry_run }}
+      RELEASE_TYPE: ${{ inputs.release_type }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Validate release inputs
         env:
           CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DRY_RUN: ${{ inputs.dry_run }}
           PUBLISH_CURSEFORGE: ${{ inputs.publish_curseforge }}
           PUBLISH_MODRINTH: ${{ inputs.publish_modrinth }}
           PUBLISH_GITHUB: ${{ inputs.publish_github }}
@@ -76,12 +81,12 @@ jobs:
               "https://api.github.com/repos/${GITHUB_REPOSITORY}" > /dev/null
           fi
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "25"
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Build all versions
         run: ./gradlew buildAll --console plain
@@ -92,7 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           CHANGELOG="$(cat CHANGELOG.md)" ./gradlew publishMods \
-            -PpublishDryRun=${{ inputs.dry_run }} \
+            -PpublishDryRun="$DRY_RUN" -PreleaseType="$RELEASE_TYPE" \
             -PpublishCurseForge=false \
             -PpublishModrinth=false \
             -PpublishGitHub=true \
@@ -105,7 +110,7 @@ jobs:
           CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
         run: |
           CHANGELOG="$(cat CHANGELOG.md)" ./gradlew publishMods \
-            -PpublishDryRun=${{ inputs.dry_run }} \
+            -PpublishDryRun="$DRY_RUN" -PreleaseType="$RELEASE_TYPE" \
             -PpublishCurseForge=true \
             -PpublishModrinth=false \
             -PpublishGitHub=false \
@@ -118,7 +123,7 @@ jobs:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         run: |
           CHANGELOG="$(cat CHANGELOG.md)" ./gradlew publishMods \
-            -PpublishDryRun=${{ inputs.dry_run }} \
+            -PpublishDryRun="$DRY_RUN" -PreleaseType="$RELEASE_TYPE" \
             -PpublishCurseForge=false \
             -PpublishModrinth=true \
             -PpublishGitHub=false \

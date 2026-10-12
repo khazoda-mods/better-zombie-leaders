@@ -79,12 +79,4 @@ tasks {
         dependsOn("stonecutterGenerate")
     }
 
-    register<Copy>("buildAndCollect") {
-        group = "build"
-        description = "Builds this NeoForge version and collects its release jars"
-
-        inputs.property("version", project.property("mod.version"))
-        from(jar.flatMap { it.archiveFile }, named<Jar>("sourcesJar").flatMap { it.archiveFile })
-        into(rootProject.layout.buildDirectory.dir("libs/${project.property("mod.version")}"))
-    }
 }

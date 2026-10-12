@@ -75,12 +75,4 @@ tasks {
         exclude("META-INF/neoforge.mods.toml")
     }
 
-    register<Copy>("buildAndCollect") {
-        group = "build"
-        description = "Builds this Fabric version and collects its release jars"
-
-        inputs.property("version", project.property("mod.version"))
-        from(named<Jar>("jar").flatMap { it.archiveFile }, named<Jar>("sourcesJar").flatMap { it.archiveFile })
-        into(rootProject.layout.buildDirectory.dir("libs/${project.property("mod.version")}"))
-    }
 }

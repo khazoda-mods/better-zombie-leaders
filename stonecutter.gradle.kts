@@ -66,17 +66,20 @@ fun artifactProvider(loader: String, version: String) = artifactDirectory.map {
     it.file(artifactFile(loader, version))
 }
 
-val buildAll = tasks.register("buildAll") {
+val buildAll = tasks.register<Sync>("buildAll") {
     group = "build"
     description = "Builds and collects jars for every supported Minecraft version"
+    into(artifactDirectory)
+    outputs.upToDateWhen { false }
 }
 
 gradle.projectsEvaluated {
     buildAll.configure {
-        dependsOn(
-            subprojects.map {
-                it.tasks.named("buildAndCollect")
-            })
+        dependsOn(subprojects.map { it.tasks.named("build") })
+        subprojects.forEach { target ->
+            from(target.tasks.named<Jar>("jar").flatMap { it.archiveFile })
+            from(target.tasks.named<Jar>("sourcesJar").flatMap { it.archiveFile })
+        }
     }
 }
 
@@ -84,7 +87,7 @@ publishMods {
     changelog.set(providers.environmentVariable("CHANGELOG"))
     version.set(modVersion)
     displayName.set("$modName $modVersion")
-    type.set(ReleaseType.STABLE)
+    type.set(ReleaseType.valueOf(providers.gradleProperty("releaseType").orElse("STABLE").get().uppercase()))
 
     dryRun.set(
         providers.gradleProperty("publishDryRun").map(String::toBoolean).orElse(false)
@@ -158,4 +161,8 @@ publishMods {
             )
         }
     }
+}
+
+tasks.matching { it.name.startsWith("publish") }.configureEach {
+    dependsOn(buildAll)
 }
