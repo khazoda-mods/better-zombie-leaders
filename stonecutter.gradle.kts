@@ -139,7 +139,10 @@ publishMods {
 
     if (publishGitHub) {
         github {
-            repository.set("khazoda-mods/betterzombieleaders")
+            repository.set(
+                providers.environmentVariable("GITHUB_REPOSITORY")
+                    .orElse("khazoda-mods/better-zombie-leaders")
+            )
             accessToken.set(providers.environmentVariable("GITHUB_TOKEN"))
             commitish.set(
                 providers.environmentVariable("GITHUB_REF_NAME").orElse("main")

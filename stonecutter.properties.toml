@@ -7,8 +7,8 @@ mod.description = "Leader zombies are larger and drop more items and exp based o
 mod.authors = "Khazoda"
 mod.license = "GPLv3"
 mod.homepage = "https://www.khazoda.com#betterzombieleaders"
-mod.sources = "https://github.com/khazoda-mods/betterzombieleaders"
-mod.issues = "https://github.com/khazoda-mods/betterzombieleaders/issues"
+mod.sources = "https://github.com/khazoda-mods/better-zombie-leaders"
+mod.issues = "https://github.com/khazoda-mods/better-zombie-leaders/issues"
 mod.discord = "https://discord.com/invite/vEZUkSxwR9"
 
 deps.fabric_loader = "0.19.3"
